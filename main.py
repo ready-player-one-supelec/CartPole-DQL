@@ -16,7 +16,7 @@ def run(numero, run_numero, games, games_before_test, test_games, exploration_ra
     ## INIT
     time.perf_counter()
     env = gym.make('CartPole-v1')
-    file = open(f'cartpole_{numero}.{run_numero}.txt', 'w')
+    file = open(f'data/cartpole_{numero}.{run_numero}.txt', 'w')
     file.close()
     # long_mem = []
 
@@ -87,7 +87,7 @@ def run(numero, run_numero, games, games_before_test, test_games, exploration_ra
                 avg_score += score
             avg_score /= test_games
             # Logging
-            file = open(f'cartpole_{numero}.{run_numero}.txt', 'a')
+            file = open(f'data/cartpole_{numero}.{run_numero}.txt', 'a')
             print(time.perf_counter(), avg_score, sep=',', file=file)
             if log: print(f"[{run_numero}] Game {i}: score {avg_score} avg over {test_games} games, exploration {exploration_rate}")
             file.close()

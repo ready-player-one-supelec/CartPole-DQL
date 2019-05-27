@@ -2,17 +2,9 @@ from main import run
 import sys
 import random
 import multiprocessing
+from conf import *
 
 
-## CONFIG
-games = 1000
-games_before_test = 10
-test_games = 20
-exploration_rate = 1
-render = False
-# mem_size = 64
-treshold = 0.1
-runs = 100
 
 numero = 0
 if len(sys.argv) < 2 or not sys.argv[1].isdigit():
