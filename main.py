@@ -95,6 +95,3 @@ def run(numero, run_numero, games, games_before_test, test_games, exploration_ra
         exploration_rate = exploration_rate - 1/games
 
     env.close()
-            
-if __name__ == "__main__":
-    run(0, 1, games, games_before_test, test_games, exploration_rate, render, treshold)
