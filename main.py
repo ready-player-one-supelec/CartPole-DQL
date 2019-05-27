@@ -12,6 +12,8 @@ def normalize(v):
 
 ## CONFIG
 games = 100000
+games_before_test = 100
+test_games = 100
 exploration_rate = 1
 render = False
 # mem_size = 64
@@ -27,7 +29,6 @@ else:
 env = gym.make('CartPole-v1')
 file = open(f'cartpole_{numero}.txt', 'w')
 file.close()
-file = open(f'cartpole_{numero}.txt', 'a')
 # long_mem = []
 
 mlp = MLP([4, 16, 16, 2])
@@ -44,8 +45,8 @@ for i in range(games):
             action = random.randint(0, 1)
         else:
             actions = mlp.frontprop(normalize(np.array(state)))
-            # action = np.argmax(actions)
-            action = np.argmin(actions)
+            action = np.argmax(actions)
+            # action = np.argmin(actions)
         short_mem.append((state, action))
         state, reward, done, _ = env.step(action)
         if render: env.render()
@@ -79,11 +80,30 @@ for i in range(games):
     #     state, action = random.choice(long_mem)
     #     mlp.backprop(normalize(np.array(state)), np.array([1, 0] if action == 1 else [0, 1]))
     #     mlp.fit()
-    # Logging
-    print(f"{score}, {exploration_rate}", file=file)
-    print(f"Game {i}: score {score}, exploration {exploration_rate}")
+    # Test
+    if i % games_before_test == 0:
+        avg_score = 0
+        for k in range(test_games):
+            state = env.reset()
+            done = False
+            score = 0
+            # Play a game
+            while not done:
+                actions = mlp.frontprop(normalize(np.array(state)))
+                action = np.argmax(actions)
+                # action = np.argmin(actions)
+                state, reward, done, _ = env.step(action)
+                if render: env.render()
+                score += 1
+            avg_score += score
+        avg_score /= test_games
+        # Logging
+        file = open(f'cartpole_{numero}.txt', 'a')
+        print(avg_score, file=file)
+        print(f"Game {i}: score {avg_score} avg over {test_games} games, exploration {exploration_rate}")
+        file.close()
     # Decrease exploration_rate
-    exploration_rate = exploration_rate * 0.9999
+    exploration_rate = exploration_rate - 1/games
 
 file.close()
 env.close()
