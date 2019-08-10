@@ -5,7 +5,7 @@ scores = []
 # exploration_rates = []
 with open(sys.argv[1], 'r') as file:
     for line in file:
-        scores.append(float(line.split(',')[0]))
+        scores.append(float(line.split(',')[1]))
         # exploration_rates.append(float(line.split(',')[1])*100)
 
 # k = 100

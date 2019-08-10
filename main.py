@@ -12,7 +12,7 @@ def normalize(v):
     return v/norm
 
 
-def run(numero, run_numero, games, games_before_test, test_games, exploration_rate, render, treshold, log):
+def run(numero, run_numero, games, games_before_test, test_games, exploration_rate, render, treshold, log, gamma):
     ## INIT
     time.perf_counter()
     env = gym.make('CartPole-v1')
@@ -30,39 +30,49 @@ def run(numero, run_numero, games, games_before_test, test_games, exploration_ra
         short_mem = []
         # Play a game
         while not done:
+            actions = mlp.frontprop(normalize(np.array(state)))
             if random.random() < exploration_rate:
                 action = random.randint(0, 1)
             else:
-                actions = mlp.frontprop(normalize(np.array(state)))
                 action = np.argmax(actions)
                 # action = np.argmin(actions)
-            short_mem.append((state, action))
-            state, reward, done, _ = env.step(action)
+            # short_mem.append((state, action))
+            new_state, reward, done, _ = env.step(action)
             if render: env.render()
-            score += 1
+            if reward != 1: print("reward:", reward)
+            if done: reward = -1
+            # Q Learning expression
+            old_value = np.max(actions)
+            new_value = reward + old_value + gamma * np.max(mlp.frontprop(normalize(np.array(state))))
+            if action == 0:
+                expected = np.array([new_value, actions[1]])
+            elif action == 1:
+                expected = np.array([actions[0], new_value])
+            mlp.backprop(state, expected)
+            state = new_state
         # If win then learn short mem
-        if score == 500:
-            for state, action in short_mem:
-                mlp.backprop(normalize(np.array(state)), np.array([1, 0] if action == 0 else [0, 1]))
-                mlp.fit()
-                # long_mem.append((state, action))
-        # If loose, don't
-        else:
-            pop = True
-            while pop:
-                state, action = short_mem.pop()
-                actions = mlp.frontprop(normalize(np.array(state)))
-                # Action chosen is bad
-                if action == 0:
-                    expected = np.array([0, actions[1]])
-                else:
-                    expected = np.array([actions[0], 0])
-                # Learn corrected action
-                mlp.backprop(normalize(np.array(state)), expected)
-                mlp.fit()
-                # Check treshold, if all under propagation, repop and relearn
-                if len(short_mem) == 0 or (mlp.frontprop(normalize(np.array(state)))>0.1).any():
-                    pop = False
+        # if score == 500:
+        #     for state, action in short_mem:
+        #         mlp.backprop(normalize(np.array(state)), np.array([1, 0] if action == 0 else [0, 1]))
+        #         mlp.fit()
+        #         # long_mem.append((state, action))
+        # # If loose, don't
+        # else:
+        #     pop = True
+        #     while pop:
+        #         state, action = short_mem.pop()
+        #         actions = mlp.frontprop(normalize(np.array(state)))
+        #         # Action chosen is bad
+        #         if action == 0:
+        #             expected = np.array([0, actions[1]])
+        #         else:
+        #             expected = np.array([actions[0], 0])
+        #         # Learn corrected action
+        #         mlp.backprop(normalize(np.array(state)), expected)
+        #         mlp.fit()
+        #         # Check treshold, if all under propagation, repop and relearn
+        #         if len(short_mem) == 0 or (mlp.frontprop(normalize(np.array(state)))>0.1).any():
+        #             pop = False
             # long_mem.append((state, action))
         # Random learning in memory
         # for k in range(mem_size):

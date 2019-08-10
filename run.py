@@ -13,7 +13,7 @@ else:
     numero = int(sys.argv[1])
 
 def f(k):
-    return run(numero, k, games, games_before_test, test_games, exploration_rate, render, treshold, log=True)
+    return run(numero, k, games, games_before_test, test_games, exploration_rate, render, treshold, log=True, gamma=gamma)
 
-p = multiprocessing.Pool(runs)
+p = multiprocessing.Pool()
 p.map(f, range(runs))
